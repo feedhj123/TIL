@@ -53,3 +53,17 @@
 - id는 # class는 '.'을 붙여준다
 - class 이름에 공백이 포함된 경우 공백은 '.'으로 대체하여 작성한다 
 - 예시) div class ='hello python' -> div.hello.python
+
+
+# BeautifulSoup
+- HTML 문서에서 원하는 부분을 추출해내는 라이브러리
+- 'requests'는 HTML을 텍스트 형태로 출력할 뿐 실제로 그 태그를 다루진 않는다.
+- BeautifulSoup 라이브러리는 위의 텍스트 결과를 실제 HTML 코드로 바꿔준다.
+- 이를 코드로 옮겨보면
+  
+  ```python
+  url(requests해올 주소) ="url"
+  url_raw = requests.get(url)
+  soup = BeautifulSoup(url_raw.text,"html.parser")
+  ```
+  이런식의 3중구조를 띈다.
