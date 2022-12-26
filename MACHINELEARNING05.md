@@ -67,3 +67,29 @@ $$ L = -y \log(a) + (y-1)\log(1-a) $$
 
 
 이를 이용하여 gd방식을 이용하여 최적의 parameters를 찾아 볼 수 있으며, 이 과정은 3.00 Logistic_Regression을 참고하여보자.
+
+
+### 참고사항
+- Classification
+  
+samples = 1000
+x, y = make_classification(n_samples=samples, n_features=2, 
+                           n_informative=2, # 독립변수 중 종속변수와 상관관계가 있는 성분의 수
+                           n_redundant=0, # 노이즈 개수
+                           n_clusters_per_class=1) # 클래스당 클러스터의 개수 예) class 0 는 2개의 cluster로 분리된다
+                           
+                           
+                           
+- solver
+
+  - optimization에 사용되는 algorithm의 종류. 
+    - {'newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga'} (default: 'lbfgs')
+   - 작은 dataset의 경우 'liblinear'이 좋은 선택일 수 있으며, 'sag'과 'saga'는 큰 dataset에서 더욱 빠르게 동작한다.
+   - Multiclass problem의 경우, 'newton-cg', 'sag', 'saga', 'lbfgs'만이 multinomial loss를 다룰 수 있다.
+   - 'liblinear'은 one-versus-rest scheme에서만 동작한다.
+   - 각 solver가 지원하는 penalty의 종류
+     - 'newton-cg': 'l2', 'none'
+     - 'lbfgs': 'l2', 'none'
+     - 'liblinear': 'l1', 'l2'
+     - 'sag': 'l2', 'none'
+     - 'saga': 'elasticnet', 'l1', 'l2', 'none'
