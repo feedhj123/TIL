@@ -93,3 +93,16 @@ x, y = make_classification(n_samples=samples, n_features=2,
      - 'liblinear': 'l1', 'l2'
      - 'sag': 'l2', 'none'
      - 'saga': 'elasticnet', 'l1', 'l2', 'none'
+
+### 확률적 경사 하강법
+- 모델을 학습 시키기 위한 방법
+- 학습 파라미터에 대한 손실 함수의 기울기를 구해 기울기가 최소화되는 방향으로 학습한다.
+
+$$\begin{equation}
+\frac{\partial L}{\partial w} = \underset{h \rightarrow 0}{lim} \frac{L(w+h) - L(w)}{h}
+\end{equation}
+
+\begin{equation}
+w^{'} = w - \alpha \frac{\partial L}{\partial w}
+\end{equation}$$
+
