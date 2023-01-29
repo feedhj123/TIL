@@ -427,10 +427,297 @@ print(AB_unsqueeze_cat)
 
 
 
+>> ## PYTORCH 모듈 
+
+### 1. torch.nn
+- torch.nn 공식문서 읽기[공식](https://pytorch.org/docs/stable/nn.html)
+
+### 1-1 nn.linear
+- y= wx + b의 linear transformation을 구현해놓은 것
+
+활용예제(텐서 크기 변환)
+```python
+import torch
+from torch import nn
+
+---모듈 import ---
+
+X = torch.Tensor([[1, 2],
+                  [3, 4]])
+
+# TODO : tensor X의 크기는 (2, 2)입니다
+#        nn.Linear를 사용하여서 (2, 5)로 크기를 바꾸고 이 크기를 출력하세요!
+
+linear = nn.Linear(2,5)
+output = linear(X)
+output.size()
+
+```
+### 1-2 nn.identity
+- 입출력값이 동일한 텐서를 출력함 
+
+```python
+import torch
+from torch import nn
+
+X = torch.Tensor([[1, 2],
+                  [3, 4]])
+
+# TODO : nn.Identity를 생성해 X를 입력시킨 후 나온 출력값이 X와 동일한지 확인해보세요!
+identity = nn.Identity()
+output = identity(X)
+output
+```
+### 1-3. nn.Module 클래스
+- 커스텀 모델 제작을 위한 클래스
+
+- pythorch의 다양한 기능들을 조합하여 모델을 만들 수 있도록 이런 일련의 기능들을 한 곳에 모아 하나의 모데롤 추상화할 수 있게 도와준다.
+
+- nn.module 자체는 빈 상자로 이해할 수 있으며 어떠한 것을 채워놓느냐에 따라 역할이 달라질 수 있다. 그 예시는 다음과 같다. 
+
+  
+  - `nn.Module`이라는 상자에 `기능`들을 가득 모아놓은 경우 `basic building block`
+  - `nn.Module`이라는 상자에 `basic building block`인 `nn.Module`들을 가득 모아놓은 경우 `딥러닝 모델`
+  - `nn.Module`이라는 상자에 `딥러닝 모델`인 `nn.Module`들을 가득 모아놓은 경우 `더욱 큰 딥러닝 모델`
+
+### nn.module 모델 제작 예시
+- 더하기 연산모델
+```python
+import torch
+from torch import nn
+
+# TODO : Add 모델을 완성하세요!
+class Add(nn.Module):
+    def __init__(self):
+        # TODO : init 과정에서 반드시 super 관련 코드가 들어가야함
+        super().__init__()
+
+    def forward(self, x1, x2):
+        # TODO : torch.add 함수를 이용해 더하기 연산 구현
+        output = torch.add(x1, x2)
+
+        return output
 
 
 
+x1 = torch.tensor([1])
+x2 = torch.tensor([2])
 
+add = Add() # 클래스 불러오기 
+output = add(x1, x2)
+
+output #3
+```
+Q.어째서 사용자 지정 클래스 작성시 super 관련 코드가 들어가야하나요? 
+
+A: python 환경에서  상위 클래스 생성자 혹은 초기화자는 자동으로 호출 되지 않습니다. 
+따라서 nn.module class 자체가 초기화 되도록 super호출이 필요합니다.
+
+python 3을 사용하는 경우, super()호출에 인자가 따로 필요하지 않고 단순히 super().__init__()으로 족합니다.
+
+- torch.sequential: 모듈들을 하나로 묶어 순차적으로 호출하고 싶을 때 사용
+   - 묶어놓은 모듈을 차례대로 수행하기 때문에 실행순서가 정해져있는 기능들을 하나로 묶어놓기가 좋다.
+  
+```python
+import torch
+from torch import nn
+
+# TODO : 다음의 모듈(Module)을 읽고 이해해보세요!
+class Add(nn.Module):
+    def __init__(self, value):
+        super().__init__()
+        self.value = value
+
+    def forward(self, x):
+        return x + self.value
+
+# TODO : 위에 모듈(Module)과 nn.Sequential를 이용해서
+#        입력값 x가 주어지면 다음의 연산을 처리하는 모델을 만들어보세요!
+#        y = x + 3 + 2 + 5
+calculator = nn.Sequential(Add(3),
+                           Add(2),
+                           Add(5))
+
+
+# 아래 코드는 수정하실 필요가 없습니다!
+x = torch.tensor([1])
+
+output = calculator(x)
+
+output # 11
+```
+
+- nn.modulelist(): python의 리스트처럼 모듈들을 모아두고 그때그때 원하는 것만 indexing해서 사용하고 싶은 경우 이것을 사용할 수 있다.
+
+```python 
+import torch
+from torch import nn
+
+# TODO : 다음의 모듈(Module)을 읽고 이해해보세요!
+class Add(nn.Module):
+    def __init__(self, value):
+        super().__init__()
+        self.value = value
+
+    def forward(self, x):
+        return x + self.value
+
+
+# TODO : Calculator 모델을 완성하세요!
+class Calculator(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.add_list = nn.ModuleList([Add(2), Add(3), Add(5)])
+
+    def forward(self, x):
+        # TODO : self.add_list에 담긴 모듈들을 이용하여서
+        #        y = ((x + 3) + 2) + 5 의 연산을 구현하세요!
+
+        x = self.add_list[1](x)  # 위에서 modulelist에 담긴 모듈add를 인덱싱으로 불러와서 사용하고 있다.
+        x = self.add_list[0](x)
+        x = self.add_list[2](x)
+        
+        return x
+
+
+# 아래 코드는 수정하실 필요가 없습니다!
+x = torch.tensor([1])
+
+calculator = Calculator()
+output = calculator(x)
+
+output # 11
+```
+
+- torch.nn.ModuleDict
+  - 파이썬의 dict처럼 특정 모듈을 key값을 이용해 보관해놓을 수 있다.
+
+```python
+import torch
+from torch import nn
+
+# TODO : 다음의 모듈(Module)을 읽고 이해해보세요!
+class Add(nn.Module):
+    def __init__(self, value):
+        super().__init__()
+        self.value = value
+
+    def forward(self, x):
+        return x + self.value
+
+
+# TODO : Calculator 모델을 완성하세요!
+class Calculator(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.add_dict = nn.ModuleDict({'add2': Add(2),
+                                       'add3': Add(3),
+                                       'add5': Add(5)})
+
+    def forward(self, x):
+        # TODO : self.add_dict에 담긴 모듈들을 이용하여서
+        #        y = ((x + 3) + 2) + 5 의 연산을 구현하세요!
+
+        x = self.add_dict['add3'](x)
+        x = self.add_dict['add2'](x)
+        x = self.add_dict['add5'](x)
+        
+        return x
+
+
+# 아래 코드는 수정하실 필요가 없습니다!
+x = torch.tensor([1])
+
+calculator = Calculator()
+output = calculator(x)
+
+output # 11
+```
+
+- torch.parameter 구현
+```python
+import torch
+from torch import nn
+from torch.nn.parameter import Parameter
+
+
+# TODO : Linear 모델을 완성하세요!
+class Linear(nn.Module):
+    def __init__(self, in_features, out_features):
+        super().__init__()
+
+        # TODO : W, b parameter를 생성하세요! 모두 1로 초기화해주세요!
+        self.W = Parameter(torch.ones((out_features, in_features)))
+        self.b = Parameter(torch.ones(out_features))
+
+    def forward(self, x):
+        output = torch.addmm(self.b, x, self.W.T) # 곱셈 + 덧셈 동시에 수행
+
+        return output
+
+
+# 아래 코드는 수정하실 필요가 없습니다!
+x = torch.Tensor([[1, 2],
+                  [3, 4]])
+
+linear = Linear(2, 3)
+output = linear(x)
+
+
+output 
+#output == torch.Tensor([[4, 4, 4],
+                     # [8, 8, 8]])):
+```
+- buffer? : 일반적인 tensor와 다르게 값이 업데이트 되지 않는다해도 저장하고 싶은 Tensor가 있을때, buffer에 등록하면 모델을 저장할 때, 해당 tensor들도 같이 저장할 수 있다.
+
+```python
+import torch
+from torch import nn
+from torch.nn.parameter import Parameter
+
+
+# TODO : Model 모델을 완성하세요!
+class Model(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+        self.parameter = Parameter(torch.Tensor([7]))
+        self.tensor = torch.Tensor([7])
+
+        # TODO : torch.Tensor([7])를 buffer이라는 이름으로 buffer에 등록해보세요!
+        self.register_buffer('buffer', torch.Tensor([7]), persistent=True)
+
+
+
+# 아래 코드는 수정하실 필요가 없습니다!
+model = Model()
+
+try:
+    buffer = model.get_buffer('buffer')
+    if buffer == 7:
+        print("🎉🎉🎉 성공!!! 🎉🎉🎉\n")
+        print("🎉 이제 buffer에 등록된 tensor는 모델이 저장될 때 같이 저장될거예요! 🎉")
+        print(model.state_dict())
+    else:
+        print("다시 도전해봐요!")
+except:
+    print("다시 도전해봐요!"
+```
+
+### Tensor vs Parameter vs Buffer
+
+- "Tensor"
+    - ❌ gradient 계산
+    - ❌ 값 업데이트
+    - ❌ 모델 저장시 값 저장
+- "Parameter"
+    - ✅ gradient 계산
+    - ✅ 값 업데이트
+    - ✅ 모델 저장시 값 저장
+- "Buffer"
+    - ❌ gradient 계산
+    - ❌ 값 업데이트
+    - ✅ 모델 저장시 값 저장
 
 
 > # 부가학습
@@ -444,3 +731,55 @@ print(AB_unsqueeze_cat)
 |  텐서 |  임의 | [[.....[1,2],[3,4]].....]  |
 
 ![참고이미지](./img_1/%EC%BA%A1%EC%B2%98.PNG)
+
+
+## iter tools(cartesian prod_)
+- 주어진 행렬 혹은 리스트의 모드 경우의 수를 출력한다.
+
+```python
+import itertools
+a = [1, 2]
+b = [4, 5]
+list(itertools.product(a,b))
+
+
+import torch
+tensor_a = torch.tensor(a)
+tensor_b = torch.tensor(b)
+torch.cartesian_prod(tensor_a, tensor_b) # 모든 경우의 수를 다 출력
+
+```
+
+## Torch autograd(미분)
+
+- 예시1
+$$
+y = w^2 \\ 
+z = 10*y + 50 \\
+z = 10*w^2 + 50 
+$$
+
+```python
+w = torch.tensor(2.0, requires_grad = True) # True이면 미분을 하겠다는 말임.
+y = w ** 2
+z = 10 * y + 50
+z.backward() #역전파
+w.grad 
+
+```
+
+- 예시2
+$$ Q = 3a^3 - b^2  $$
+```python
+
+a = torch.tensor([2., 3.], requires_grad = True) # 미분을 할지 안할지
+b = torch.tensor([6., 4.], requires_grad=True)
+Q = 3* a **3 - b**2
+external_grad = torch.tensor([1., 1.])
+Q.backward(gradient=external_grad)
+
+a.grad   
+
+# a에대한 편미분을 실시하면 다른 변수(이 식에서는 b)는 상수 취급한다 따라서 남게되는 결과는 9a^2 이므로 
+36(a=2),81(a=3)이 된다.
+```
